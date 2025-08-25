@@ -1,19 +1,51 @@
-- hosts: app
+---
+- name: Deploy Spring Boot App
+  hosts: app
   become: yes
+  vars:
+    app_user: ubuntu
+    app_dir: /home/ubuntu/app
+    jar_name: simple-hello-Narasimha-Error-1.0.0.jar
+    jar_path_local: target/{{ jar_name }}
+    jar_path_remote: "{{ app_dir }}/{{ jar_name }}"
+    log_file: "{{ app_dir }}/logs.out"
+    java_opts: "-Xms256m -Xmx512m"
+
   tasks:
-    - name: Update apt cache
-      apt:
-        update_cache: yes
+    - name: Ensure app directory exists
+      file:
+        path: "{{ app_dir }}"
+        state: directory
+        owner: "{{ app_user }}"
+        group: "{{ app_user }}"
+        mode: '0755'
 
-    - name: Upgrade packages
-      apt:
-        upgrade: dist
-        force_apt_get: yes
+    - name: Copy Spring Boot JAR to remote server
+      copy:
+        src: "{{ jar_path_local }}"
+        dest: "{{ jar_path_remote }}"
+        owner: "{{ app_user }}"
+        group: "{{ app_user }}"
+        mode: '0755'
 
-    - name: Install Nginx
+    - name: Stop any running Spring Boot app
+      shell: |
+        pkill -f "{{ jar_name }}" || true
+      ignore_errors: yes
+
+    - name: Start Spring Boot app
+      shell: |
+        nohup java {{ java_opts }} -jar "{{ jar_path_remote }}" > "{{ log_file }}" 2>&1 &
+      args:
+        chdir: "{{ app_dir }}"
+      async: 0
+      poll: 0
+
+    - name: Ensure Nginx is installed and running
       apt:
         name: nginx
         state: present
+        update_cache: yes
 
     - name: Start and enable Nginx
       service:
