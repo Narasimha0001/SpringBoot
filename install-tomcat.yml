@@ -1,24 +1,24 @@
 ---
-- name: install Tomcat9 on Application node
+- name: Install Tomcat9 on Application Node
   hosts: app_nodes
   become: yes
   tasks:
-     - name:update apt cache
-       apt:
-         update_cache: yes
+    - name: Update apt cache
+      apt:
+        update_cache: yes
 
-     - name: Install Java
-       apt:
-         name: tomcat9
-         state: present
-        
-     - name: Install Tomcat9
-       apt:
-          name: tomcat9
-          state: present
+    - name: Install Java (OpenJDK)
+      apt:
+        name: default-jdk
+        state: present
 
-     - name: Ensure Tomcat is enabled and running
-       systemd:
-          name: tomcat9
-          state: started
-          enabled: yes
+    - name: Install Tomcat9
+      apt:
+        name: tomcat9
+        state: present
+
+    - name: Ensure Tomcat9 is enabled and running
+      systemd:
+        name: tomcat9
+        state: started
+        enabled: yes
