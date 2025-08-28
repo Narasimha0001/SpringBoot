@@ -1,0 +1,19 @@
+---
+- name:Deploy WAR to Tomcat9
+  hosts:app_nodes
+  become: yes
+  vars:
+   war_source: "{{lookup('env','WORKSPACE')}}/target/app.war"
+   war_dest: "/var/lib/tomcat9/webapps/app.war"
+
+  tasks:
+   - name:Copy WAR file to Tomcat
+     copy:
+      src: "{{war_source}}"
+      dest: "{{war_dest}}"
+      mode: '0644'
+  
+   - name: Restart Tomcat
+     systemd:
+      name: tomcat9
+      state: restarted
