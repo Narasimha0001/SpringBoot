@@ -8,7 +8,7 @@ public class HelloController {
 		int a = 5;
 	@GetMapping("/")
 	public String Hello() {
-		String message = "Hello world, this is Pujitha";
+		String message = "Hello world, this is Narasimha";
  
         
         int unusedVariable = 100;
